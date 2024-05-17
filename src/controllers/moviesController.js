@@ -1,15 +1,12 @@
 import Movie from "../models/Movie.js";
-import { pool } from "../config/db.js";
 
-export const getAllMovies = async (req, res) => {
+export const getAllMovies = async (_req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM movies");
-    const movies = result.rows.map(
-      (row) => new Movie(row.id, row.title, row.description)
-    );
+    const movies = await Movie.findAll();
     res.json(movies);
   } catch (error) {
     console.error("Error fetching movies:", error);
-    res.status(500).json({ error: "Internal server error" });
+    // res.status(500).json({ error: 'An error occurred' });
+    res.status(500).json({ error: `Error fetching movies: ${error}` });
   }
 };
