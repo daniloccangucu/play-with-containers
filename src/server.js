@@ -5,13 +5,15 @@ import moviesRoutes from "./routes/moviesRoutes.js";
 
 const app = express();
 
+app.use(express.json());
+
 app.use("/movies", moviesRoutes);
 
 app.get("/hello", (_req, res) => {
   res.send("Hello, world!");
 });
 
-const port = 5000;
+const port = 8080;
 
 sequelize
   .sync({ force: false })
