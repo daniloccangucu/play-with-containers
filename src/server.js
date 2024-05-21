@@ -1,7 +1,10 @@
 import express from "express";
+import dotenv from "dotenv";
 
 import sequelize from "./config/database.js";
 import moviesRoutes from "./routes/moviesRoutes.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -9,11 +12,7 @@ app.use(express.json());
 
 app.use("/movies", moviesRoutes);
 
-app.get("/hello", (_req, res) => {
-  res.send("Hello, world!");
-});
-
-const port = 8080;
+const port = process.env.INVENTORY_PORT;
 
 sequelize
   .sync({ force: false })
