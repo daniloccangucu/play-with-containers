@@ -1,21 +1,66 @@
 version: '3.8'
 
 services:
-  inventory-db:
+  inventory-database:
     image: postgres:13
     environment:
       - POSTGRES_USER=${PGUSER}
       - POSTGRES_PASSWORD=${PGPASSWORD}
-    ports:
-      - "5433:5432"
     volumes:
-      - inventory-db-data:/var/lib/postgresql/data
+      - inventory-database:/var/lib/postgresql/data
       - ./db-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  inventory-app:
+    build:
+      context: ./inventory-app
+      dockerfile: Dockerfile
+    environment:
+      - INVENTORY_PORT=${INVENTORY_PORT}
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGDATABASE=${PGDATABASE}
+    depends_on:
+      inventory-database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${INVENTORY_PORT}/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    environment:
+      - GATEWAY_PORT=${GATEWAY_PORT}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - INVENTORY_API_URL=${INVENTORY_API_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      inventory-app:
+        condition: service_healthy
+    volumes:
+      - api-gateway:/var/log/api-gateway
     networks:
       - app-network
 
 volumes:
-  inventory-db-data:
+  inventory-database:
+  api-gateway:
 
 networks:
   app-network:
