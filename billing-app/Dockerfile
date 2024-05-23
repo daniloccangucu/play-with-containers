@@ -1,0 +1,12 @@
+# Use Debian-based Node.js image
+FROM node:14
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3001
+CMD ["node", "src/server.js"]

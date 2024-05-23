@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=${PGPASSWORD}
     volumes:
       - inventory-database:/var/lib/postgresql/data
-      - ./db-scripts:/docker-entrypoint-initdb.d
+      - ./scripts/db-inventory:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s
@@ -39,6 +39,47 @@ services:
     networks:
       - app-network
 
+  billing-database:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=${PG_2_USER}
+      - POSTGRES_PASSWORD=${PG_2_PASSWORD}
+    volumes:
+      - billing-database:/var/lib/postgresql/data
+      - ./scripts/db-billing:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  billing-app:
+    build:
+      context: ./billing-app
+      dockerfile: Dockerfile
+    environment:
+      - BILLING_PORT=${BILLING_PORT}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+      - PG_2_DATABASE=${PG_2_DATABASE}
+      - PG_2_USER=${PG_2_USER}
+      - PG_2_PASSWORD=${PG_2_PASSWORD}
+      - PGHOST=${PG_2_HOST}
+      - PGPORT=${PGPORT}
+    depends_on:
+      billing-database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${BILLING_PORT}/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+
   api-gateway:
     build:
       context: ./api-gateway
@@ -53,6 +94,8 @@ services:
     depends_on:
       inventory-app:
         condition: service_healthy
+      billing-app:
+        condition: service_healthy
     volumes:
       - api-gateway:/var/log/api-gateway
     networks:
@@ -60,7 +103,11 @@ services:
 
 volumes:
   inventory-database:
+      name: inventory-database
+  billing-database:
+      name: billing-database
   api-gateway:
+      name: api-gateway
 
 networks:
   app-network:
