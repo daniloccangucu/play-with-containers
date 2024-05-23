@@ -12,13 +12,23 @@ app.use(express.json());
 
 app.use("/movies", moviesRoutes);
 
+app.get("/health", (_req, res) => {
+  res.status(200).send("OK");
+});
+
 const port = process.env.INVENTORY_PORT;
 
 sequelize
   .sync({ force: false })
   .then(() => {
     app.listen(port, () => {
-      console.log(`Server is running on http://localhost:${port}`);
+      console.log(`Inventory app is running on port ${port}`);
+      console.log(
+        `Access within Docker network: http://inventory-app:${port}/movies`
+      );
+      console.log(
+        `Health check available at: http://inventory-app:${port}/health`
+      );
     });
   })
   .catch((err) => {
