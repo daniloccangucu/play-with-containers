@@ -28,7 +28,6 @@ export async function connectToRabbitMQ() {
       { noAck: false }
     );
 
-    console.log("Connected to RabbitMQ");
   } catch (error) {
     console.error("Error connecting to RabbitMQ:", error);
     throw error;
