@@ -15,7 +15,7 @@ const INVENTORY_API_URL = process.env.INVENTORY_API_URL;
 app.use(json());
 
 app.use("/api/movies", proxy);
-// app.use("/api", routes);
+app.use("/api", routes);
 
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
