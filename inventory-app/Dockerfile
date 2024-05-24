@@ -1,4 +1,4 @@
-# Use Debian-based Node.js image
+# Based on Debian (node:14 image)
 FROM node:14
 
 WORKDIR /app
