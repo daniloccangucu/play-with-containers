@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   inventory-database:
+    image: inventory-database:latest
     build:
       context: ./inventory-database
       dockerfile: Dockerfile
@@ -18,8 +19,10 @@ services:
       retries: 5
     networks:
       - app-network
+    restart: on-failure
 
   inventory-app:
+    image: inventory-app:latest 
     build:
       context: ./inventory-app
       dockerfile: Dockerfile
@@ -41,8 +44,10 @@ services:
       retries: 5
     networks:
       - app-network
+    restart: on-failure
 
   billing-database:
+    image: billing-database:latest
     build:
       context: ./billing-database
       dockerfile: Dockerfile
@@ -59,8 +64,10 @@ services:
       retries: 5
     networks:
       - app-network
+    restart: on-failure
   
-  rabbitmq-server:
+  rabbitmq:
+    image: rabbitmq:latest
     build:
       context: ./rabbitmq-server
       dockerfile: Dockerfile
@@ -75,10 +82,12 @@ services:
       retries: 5
     networks:
       - app-network
+    restart: on-failure
     expose:
       - "5672"
 
   billing-app:
+    image: billing-app:latest
     build:
       context: ./billing-app
       dockerfile: Dockerfile
@@ -93,7 +102,7 @@ services:
       - PGHOST=${PG_2_HOST}
       - PGPORT=${PGPORT}
     depends_on:
-      rabbitmq-server:
+      rabbitmq:
         condition: service_healthy
       billing-database:
         condition: service_healthy
@@ -104,28 +113,35 @@ services:
       retries: 5
     networks:
       - app-network
+    restart: on-failure
 
   api-gateway:
+    image: api-gateway:latest
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
     environment:
       - NODE_USER=${NODE_USER}
       - GATEWAY_PORT=${GATEWAY_PORT}
+      - GATEWAY_HOST=${GATEWAY_HOST}
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
       - RABBITMQ_URL=${RABBITMQ_URL}
       - INVENTORY_API_URL=${INVENTORY_API_URL}
     ports:
-      - "3000:3000"
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
     depends_on:
       inventory-app:
         condition: service_healthy
-      rabbitmq-server:
+      rabbitmq:
         condition: service_healthy
     volumes:
       - api-gateway:/var/log/api-gateway
     networks:
       - app-network
+    restart: on-failure
 
 volumes:
   inventory-database:
@@ -137,3 +153,9 @@ volumes:
 
 networks:
   app-network:
+      enable_ipv6: true
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          - subnet: "fd12:3456:789c::/64"
