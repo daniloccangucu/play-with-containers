@@ -13,6 +13,6 @@ RUN mkdir -p /var/log/api-gateway && chown -R ${NODE_USER}:${NODE_USER} /var/log
 
 USER ${NODE_USER}
 
-EXPOSE ${GATEWAY_PORT}
+EXPOSE 3000
 
 CMD ["node", "server.js"]
