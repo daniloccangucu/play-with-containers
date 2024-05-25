@@ -46,3 +46,11 @@ A Dockerfile is a script composed of a series of instructions on how to build a 
 - **USER**: Specifies the user to run commands as.
 - **EXPOSE**: Documents the port on which the container listens.
 - **CMD**: Specifies the default command to run when the container starts.
+
+### Audit Questions with Answers Batch #4
+**What is the Docker network?**
+The Docker network is a virtual network that connects Docker containers, enabling them to communicate with each other and with external networks.
+
+**Why do we use the Docker network?**
+We use the Docker network to facilitate container communication, manage container isolation, and ensure secure and efficient data exchange between services within Dockerized applications.
+
