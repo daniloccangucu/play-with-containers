@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 
 export const getAllMovies = async (req, res) => {
   try {
+    console.log("getAllMovies called with query:", req.query);
     const { title } = req.query;
     let whereClause = {};
 
@@ -12,9 +13,11 @@ export const getAllMovies = async (req, res) => {
           [Op.iLike]: `%${title}%`,
         },
       };
+      console.log("getAllMovies whereClause:", whereClause);
     }
 
     const movies = await Movie.findAll({ where: whereClause });
+    console.log("getAllMovies fetched movies:", movies);
     res.json(movies);
   } catch (error) {
     console.error("Error fetching movies:", error);
@@ -24,6 +27,7 @@ export const getAllMovies = async (req, res) => {
 
 export const createMovie = async (req, res) => {
   try {
+    console.log("createMovie called with body:", req.body);
     const { title, description } = req.body;
 
     const newMovie = await Movie.create({
@@ -31,6 +35,7 @@ export const createMovie = async (req, res) => {
       description,
     });
 
+    console.log("createMovie created new movie:", newMovie);
     res.status(201).json(newMovie);
   } catch (error) {
     console.error("Error creating movie:", error);
@@ -40,7 +45,9 @@ export const createMovie = async (req, res) => {
 
 export const deleteAllMovies = async (_req, res) => {
   try {
+    console.log("deleteAllMovies called");
     const result = await Movie.destroy({ truncate: true });
+    console.log("deleteAllMovies result:", result);
     if (result !== 0) {
       res.status(200).json({ message: `Movies were not deleted.` });
     } else {
@@ -54,8 +61,10 @@ export const deleteAllMovies = async (_req, res) => {
 
 export const getMovieById = async (req, res) => {
   try {
+    console.log("getMovieById called with params:", req.params);
     const { id } = req.params;
     const movie = await Movie.findByPk(id);
+    console.log("getMovieById found movie:", movie);
     if (!movie) {
       return res.status(404).json({ error: "Movie not found" });
     }
@@ -68,6 +77,12 @@ export const getMovieById = async (req, res) => {
 
 export const updateMovieById = async (req, res) => {
   try {
+    console.log(
+      "updateMovieById called with params:",
+      req.params,
+      "and body:",
+      req.body
+    );
     const { id } = req.params;
     const { title, description } = req.body;
 
@@ -76,6 +91,7 @@ export const updateMovieById = async (req, res) => {
       { where: { id } }
     );
 
+    console.log("updateMovieById update result:", updated);
     if (updated === 0) {
       return res.status(404).json({ error: "Movie not found" });
     }
@@ -89,12 +105,14 @@ export const updateMovieById = async (req, res) => {
 
 export const deleteMovieById = async (req, res) => {
   try {
+    console.log("deleteMovieById called with params:", req.params);
     const { id } = req.params;
 
     const deleted = await Movie.destroy({
       where: { id },
     });
 
+    console.log("deleteMovieById delete result:", deleted);
     if (deleted === 0) {
       return res.status(404).json({ error: "Movie not found" });
     }

@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
+console.log("Defining the Movie model...");
+
 const Movie = sequelize.define(
   "Movie",
   {
@@ -23,5 +25,7 @@ const Movie = sequelize.define(
     tableName: "movies",
   }
 );
+
+console.log("Movie model defined:", Movie === sequelize.models.Movie);
 
 export default Movie;
