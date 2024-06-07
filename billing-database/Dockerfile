@@ -10,3 +10,4 @@ ENV POSTGRES_PASSWORD=${PG_2_PASSWORD}
 
 # Copy initialization scripts
 COPY ./scripts/db-billing/ /docker-entrypoint-initdb.d
+RUN chmod +x /docker-entrypoint-initdb.d/1-configure-postgres.sh
