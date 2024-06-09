@@ -15,7 +15,6 @@ app.use(express.json());
 app.use("/movies", moviesRoutes);
 
 app.get("/health", (_req, res) => {
-  console.log("Health check endpoint called");
   res.status(200).send("OK");
 });
 
